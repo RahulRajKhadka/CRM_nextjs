@@ -1,118 +1,117 @@
-// pages/customer/index.js
-import { useState } from 'react';
-import Header from '../../components/Header';
-import Sidebar from '../../components/Sidebar';
-import Tabs from '../../components/Tabs';
-import CustomerTable from '../../components/CustomerTable';
-import Pagination from '../../components/Pagination';
+import Pagination from "../../components/ui/Pagination/Pagination.js";
+import SearchInput from "../../components/ui/SearchInput/SerchInput.js";
+import Table from "../../components/ui/Table/CustomerTable.js";
+import Tabs from "../../components/ui/Tabs/Tabs.js";
+import { useEffect, useState } from "react";
+import CustomerRow from "../../components/ui/Table/CustomerRow.js";
+import Sidebar from "../../components/Layout/Siderbar/Sidebar.js";
+import Header from "../../components/Layout/Header/Header.js";
+import axiosInstance from "../../lib/axios/axios_instance.js";
+import TableHeader from "@/components/ui/Table/TableHeader.js";
 
 export default function CustomerPage() {
-  const [customers, setCustomers] = useState([
-    {
-      id: 1,
-      name: 'Dolma Gurung',
-      email: 'dolmagurung@email.com',
-      phone: '+81 5252 5252',
-      status: 'approved'
-    },
-    {
-      id: 2,
-      name: 'Dolma Gurung',
-      email: 'dolmagurung@email.com',
-      phone: '+81 5252 5252',
-      status: 'pending'
-    },
-    {
-      id: 3,
-      name: 'Dolma Gurung',
-      email: 'dolmagurung@email.com',
-      phone: '+81 5252 5252',
-      status: 'approved'
-    },
-    {
-      id: 4,
-      name: 'Dolma Gurung',
-      email: 'dolmagurung@email.com',
-      phone: '+81 5252 5252',
-      status: 'approved'
-    },
-    {
-      id: 5,
-      name: 'Dolma Gurung',
-      email: 'dolmagurung@email.com',
-      phone: '+81 5252 5252',
-      status: 'approved'
-    },
-  ]);
-
-  const [activeTab, setActiveTab] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [customers, setCustomers] = useState([]);
+  const [activeTab, setActiveTab] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalData, setTotalData] = useState(0);
+  const [loading, setLoading] = useState(false);
 
-  const handleApprove = (id) => {
-    setCustomers(customers.map(customer => 
-      customer.id === id ? { ...customer, status: 'approved' } : customer
-    ));
+  const perPage = 6;
+
+  const tabs = [
+    { label: "All", value: "all" },
+    { label: "Approved", value: "approved" },
+    { label: "Reject", value: "reject" },
+  ];
+
+  const fetchCustomers = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get(
+        `customers?page=${currentPage}&per_page=${perPage}&sort_by=created_at&sort_order=asc&customer_type=customers_all`
+      );
+      console.log(response, "resp");
+
+      let items = response?.data?.data?.items || [];
+      console.log("Fetched Items:", items);
+
+      setCustomers(items);
+      setTotalPages(response?.data?.data?.total_pages || 1);
+      setTotalData(response?.data?.data?.total || 0);
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleReject = (id) => {
-    setCustomers(customers.map(customer => 
-      customer.id === id ? { ...customer, status: 'rejected' } : customer
-    ));
-  };
-
-  const filteredCustomers = customers.filter(customer => {
-    const matchesSearch = customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         customer.email.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    if (activeTab === 'all') return matchesSearch;
-    if (activeTab === 'approved') return matchesSearch && customer.status === 'approved';
-    if (activeTab === 'reject') return matchesSearch && customer.status === 'rejected';
-    return matchesSearch;
-  });
-
-  const totalPages = Math.ceil(filteredCustomers.length / itemsPerPage);
-  const paginatedCustomers = filteredCustomers.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  useEffect(() => {
+    fetchCustomers();
+  }, [currentPage]);
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar />
+    <div className="flex h-screen bg-gray-400 ">
+  <Sidebar />
+
+  <div className="flex-1 flex flex-col overflow-hidden">
+    <Header
+        title="Customer"
+        userName="Dolma Gurung"
+        userLocation="Kathmandu, Nepal"
+      />
+    <div className="p-4">
+      {/* Header */}
       
-      <div className="flex-1 flex flex-col">
-        <Header title="Customer" userName="Dolma Gurung" userLocation="Dolma" />
-        
-        <main className="flex-1 overflow-auto p-8">
-          <div className="bg-white rounded-lg shadow-sm ">
-            <Tabs activeTab={activeTab} setActiveTab={setActiveTab} count={customers.length} />
-            
-            <div className="mt-6">
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-xl px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
 
-            <CustomerTable 
-              customers={paginatedCustomers}
-              onApprove={handleApprove}
-              onReject={handleReject}
-            />
-
-            <Pagination 
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
+      {/* Table Container */}
+      <div className="table-container rounded-lg bg-white mt-4 flex flex-col h-[calc(100vh-80px)]">
+        {/* Tabs & Search */}
+        <div className="p-6">
+          <Tabs tabs={tabs} />
+          <div className="mt-6">
+            <SearchInput
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by name, email, or phone..."
             />
           </div>
-        </main>
+        </div>
+
+        {/* Table Header */}
+        <TableHeader headers={["Name", "Email", "Phone", "Action"]} />
+
+        {/* Scrollable Table Rows */}
+        <div className="flex-1 overflow-auto bg-white">
+          {loading ? (
+            <div className="text-center py-8 text-gray-500">Loading...</div>
+          ) : customers.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              No customers found
+            </div>
+          ) : (
+            <Table>
+              {customers.map((customer) => (
+                <CustomerRow key={customer.id} customer={customer} />
+              ))}
+            </Table>
+          )}
+        </div>
+
+        {/* Pagination */}
+        <div className="p-4">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalData}
+            onPageChange={setCurrentPage}
+          />
+        </div>
       </div>
     </div>
+  </div>
+</div>
+
   );
 }

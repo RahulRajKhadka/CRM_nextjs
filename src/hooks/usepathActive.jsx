@@ -23,7 +23,7 @@ const SidebarLink = ({ href, icon, label }) => {
         height={20}
         className={isActive ? "brightness-0 invert" : ""}
       />
-      <span className="font-medium">{label}</span>
+      <span className="text-sm">{label}</span>
     </Link>
   );
 };

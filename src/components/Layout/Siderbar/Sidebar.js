@@ -1,15 +1,23 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import  SidebarLink from "../hooks/Sidebar.jsx";
+import SidebarLink from "../../../hooks/usepathActive.jsx";
 
 export default function Sidebar() {
   const menuItems = [
     { href: "/customer", icon: "/icons/customer.png", label: "Customer" },
     { href: "/banner", icon: "/icons/banner.png", label: "Banner" },
     { href: "/new-plan", icon: "/icons/plan.png", label: "New Plan" },
-    { href: "/special-campaign", icon: "/icons/special_campaign.png", label: "Special Campaign" },
-    { href: "/our-services", icon: "/icons/services.png", label: "Our Services" },
+    {
+      href: "/special-campaign",
+      icon: "/icons/special_campaign.png",
+      label: "Special Campaign",
+    },
+    {
+      href: "/our-services",
+      icon: "/icons/services.png",
+      label: "Our Services",
+    },
   ];
 
   return (
