@@ -1,291 +1,202 @@
-// pages/special-campaign/index.js
-import { useState } from "react";
-import Header from "../../components/Layout/Header/Header";
-import Sidebar from "../../components/Layout/Siderbar/Sidebar";
-import Tabs from "../../components/ui/Tabs/Tabs";
+import { useState, useEffect } from "react";
 
-export default function SpecialCampaignPage() {
-  const [campaigns, setCampaigns] = useState([
-    {
-      id: 1,
-      title: "Holiday Mega Sale",
-      description: "Get 50% off on all plans",
-      startDate: "2024-12-01",
-      endDate: "2024-12-31",
-      discount: "50%",
-      status: "active",
-    },
-    {
-      id: 2,
-      title: "New Year Bonanza",
-      description: "Extra 10GB data for free",
-      startDate: "2024-01-01",
-      endDate: "2024-01-15",
-      discount: "10GB Free",
-      status: "active",
-    },
-    {
-      id: 3,
-      title: "Student Special",
-      description: "Special rates for students",
-      startDate: "2024-01-10",
-      endDate: "2024-03-31",
-      discount: "30%",
-      status: "inactive",
-    },
-  ]);
-
-  const [activeTab, setActiveTab] = useState("all");
+export default function CampaignsPage() {
+  const [campaigns, setCampaigns] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [newCampaign, setNewCampaign] = useState({
-    title: "",
-    description: "",
-    startDate: "",
-    endDate: "",
-    discount: "",
-    status: "active",
-  });
+  const [loading, setLoading] = useState(true);
 
-  const handleAddCampaign = () => {
-    if (newCampaign.title && newCampaign.startDate && newCampaign.endDate) {
-      setCampaigns([
-        ...campaigns,
-        {
-          id: campaigns.length + 1,
-          ...newCampaign,
-        },
-      ]);
-      setNewCampaign({
-        title: "",
-        description: "",
-        startDate: "",
-        endDate: "",
-        discount: "",
-        status: "active",
-      });
-      setShowModal(false);
-    }
-  };
-
-  const handleToggleStatus = (id) => {
-    setCampaigns(
-      campaigns.map((campaign) =>
-        campaign.id === id
-          ? {
-              ...campaign,
-              status: campaign.status === "active" ? "inactive" : "active",
-            }
-          : campaign
-      )
-    );
-  };
-
-  const handleDelete = (id) => {
-    setCampaigns(campaigns.filter((campaign) => campaign.id !== id));
-  };
+  useEffect(() => {
+    const fetchCampaigns = async () => {
+      try {
+        const res = await fetch(
+          "https://crmapi.nitvtelecom.com/api/v1/guest_homepage/"
+        );
+        const data = await res.json();
+        setCampaigns(data?.data?.campaign || []);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching campaigns:", error);
+        setLoading(false);
+      }
+    };
+    fetchCampaigns();
+  }, []);
 
   const filteredCampaigns = campaigns.filter((campaign) => {
-    const matchesSearch = campaign.title
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    if (activeTab === "all") return matchesSearch;
-    if (activeTab === "active")
-      return matchesSearch && campaign.status === "active";
-    if (activeTab === "inactive")
-      return matchesSearch && campaign.status === "inactive";
-    return matchesSearch;
+    return (
+      campaign.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      campaign.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      campaign.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
   });
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar />
+    <div className="min-h-screen bg-gray-200 p-2 sm:p-4 md:p-6 lg:p-8">
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col h-[calc(100vh-1rem)] sm:h-[calc(100vh-2rem)] md:h-[calc(100vh-3rem)] lg:h-[calc(100vh-4rem)]">
+        {/* Header */}
+        <div className="border-b border-gray-200 px-4 pt-4 pb-3">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
+            Campaigns
+          </h1>
+        </div>
 
-      <div className="flex-1 flex flex-col">
-        <Header
-          title="Special Campaign"
-          userName="Dolma Gurung"
-          userLocation="Dolma"
-        />
-
-        <main className="flex-1 overflow-auto p-8">
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-semibold text-gray-800">
-                Campaigns
-              </h2>
-              <button
-                onClick={() => setShowModal(true)}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                + Add New Campaign
-              </button>
-            </div>
-
-            <Tabs
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              tabs={[
-                { id: "all", label: "All" },
-                { id: "active", label: "Active" },
-                { id: "inactive", label: "Inactive" },
-              ]}
-            />
-
-            <div className="mt-6">
-              <input
-                type="text"
-                placeholder="Search campaigns..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        {/* Search */}
+        <div className="py-3 sm:py-6 px-2 flex gap-3 sm:px-4 w-full">
+          <input
+            type="text"
+            placeholder="Search campaigns..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full sm:w-xl sm:min-w-[300px] px-3 sm:px-4 text-xs sm:text-sm py-2 sm:py-3 bg-gray-100 rounded-lg placeholder-gray-300"
+          />
+          <div class="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white md:text-sm text-xs px-4 py-2 rounded-md cursor-pointer">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="w-6 h-6"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 4.5v15m7.5-7.5h-15"
               />
-            </div>
-
-            <div className="mt-6 space-y-4">
-              {filteredCampaigns.map((campaign) => (
-                <div
-                  key={campaign.id}
-                  className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-semibold text-xl">
-                          {campaign.title}
-                        </h3>
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            campaign.status === "active"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-gray-100 text-gray-700"
-                          }`}
-                        >
-                          {campaign.status}
-                        </span>
-                      </div>
-                      <p className="text-gray-600 mb-4">
-                        {campaign.description}
-                      </p>
-                      <div className="flex gap-6 text-sm text-gray-500">
-                        <div>
-                          <span className="font-medium">Start:</span>{" "}
-                          {campaign.startDate}
-                        </div>
-                        <div>
-                          <span className="font-medium">End:</span>{" "}
-                          {campaign.endDate}
-                        </div>
-                        <div>
-                          <span className="font-medium">Discount:</span>
-                          <span className="text-blue-600 font-semibold ml-1">
-                            {campaign.discount}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleToggleStatus(campaign.id)}
-                        className="px-4 py-2 text-sm border border-blue-500 text-blue-600 rounded hover:bg-blue-50"
-                      >
-                        Toggle
-                      </button>
-                      <button
-                        onClick={() => handleDelete(campaign.id)}
-                        className="px-4 py-2 text-sm border border-red-500 text-red-600 rounded hover:bg-red-50"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </main>
-      </div>
-
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-96">
-            <h3 className="text-xl font-semibold mb-4">Add New Campaign</h3>
-            <div className="space-y-4">
-              <input
-                type="text"
-                placeholder="Campaign Title"
-                value={newCampaign.title}
-                onChange={(e) =>
-                  setNewCampaign({ ...newCampaign, title: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <textarea
-                placeholder="Description"
-                value={newCampaign.description}
-                onChange={(e) =>
-                  setNewCampaign({
-                    ...newCampaign,
-                    description: e.target.value,
-                  })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-20"
-              />
-              <input
-                type="date"
-                placeholder="Start Date"
-                value={newCampaign.startDate}
-                onChange={(e) =>
-                  setNewCampaign({ ...newCampaign, startDate: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <input
-                type="date"
-                placeholder="End Date"
-                value={newCampaign.endDate}
-                onChange={(e) =>
-                  setNewCampaign({ ...newCampaign, endDate: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <input
-                type="text"
-                placeholder="Discount (e.g., 50% or 10GB Free)"
-                value={newCampaign.discount}
-                onChange={(e) =>
-                  setNewCampaign({ ...newCampaign, discount: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <select
-                value={newCampaign.status}
-                onChange={(e) =>
-                  setNewCampaign({ ...newCampaign, status: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-              <div className="flex gap-2 justify-end">
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleAddCampaign}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                >
-                  Add Campaign
-                </button>
-              </div>
-            </div>
+            </svg>
+            Add New
           </div>
         </div>
-      )}
+
+        {/* Table Container */}
+        <div className="flex-1 flex flex-col min-h-0">
+          <div className="rounded-lg flex flex-col h-full">
+            {/* Desktop Table View */}
+            <div className="hidden md:flex md:flex-col h-full">
+              <div className="grid grid-cols-5 w-full px-2 lg:px-4 text-xs lg:text-sm border-b border-gray-200 text-gray-400 py-6 lg:py-6 border-t bg-gray-50 z-10">
+                {["Name", "Image", "Title", "Status", "Actions"].map(
+                  (col) => (
+                    <div key={col} className="flex justify-center">
+                      <div className="flex items-center gap-1 lg:gap-2 font-medium">
+                        <span>{col}</span>
+                        {/* Sort SVG */}
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="w-4 h-3 lg:w-5 lg:h-4"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  )
+                )}
+              </div>
+
+              {/* Table Body */}
+              <div className="flex-1 overflow-auto">
+                {loading ? (
+                  <div className="flex items-center justify-center h-full text-gray-500 py-8">
+                    Loading campaigns...
+                  </div>
+                ) : filteredCampaigns.length > 0 ? (
+                  filteredCampaigns.map((campaign) => (
+                    <div
+                      key={campaign.id}
+                      className="grid grid-cols-5 w-full text-xs lg:text-sm hover:bg-gray-50 py-3 "
+                    >
+                      <div className="flex justify-center items-center px-2 truncate">
+                        {campaign.name}
+                      </div>
+                      <div className="flex justify-center items-center px-2">
+                        <img
+                          src={campaign.image_link}
+                          alt={campaign.name}
+                          className="w-16 h-16 object-cover rounded"
+                        />
+                      </div>
+
+                      <div className="flex justify-center items-center px-2 truncate">
+                        {campaign.title}
+                      </div>
+
+                      <div className="flex justify-center items-center px-2">
+                        <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
+                          {campaign.link_type}
+                        </span>
+                      </div>
+<div className="flex justify-center items-center gap-2 px-2">
+  {campaign.status !== "approved" && (
+    <button
+      onClick={() => handleApprove(campaign.id)}
+      className="px-3 lg:px-4 border-2 border-transparent text-black text-md rounded-xs py-1.5 hover:border-green-500 hover:bg-green-50 transition-colors"
+    >
+      Approve
+    </button>
+  )}
+  {campaign.status !== "rejected" && (
+    <button
+      onClick={() => handleReject(campaign.id)}
+      className="px-3 lg:px-4 border-2 border-transparent text-black text-md rounded-xs py-1.5 hover:border-red-500 hover:bg-red-50 transition-colors"
+    >
+      Reject
+    </button>
+  )}
+  {(campaign.status === "approved" || campaign.status === "rejected") && (
+    <span className="text-center text-xs lg:text-sm font-medium">
+      {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
+    </span>
+  )}
+</div>
+
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-500 py-8">
+                    No campaigns found
+                  </div>
+                )}
+              </div>
+            </div>
+<div className="md:hidden flex flex-col gap-3 overflow-auto pb-4 h-full px-2">
+  {loading ? (
+    <div className="flex items-center justify-center h-full text-gray-500 py-8">
+      Loading campaigns...
+    </div>
+  ) : filteredCampaigns.length > 0 ? (
+    filteredCampaigns.map((campaign) => (
+      <div
+        key={campaign.id}
+        className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm flex flex-col items-center gap-3"
+      >
+        {/* Campaign Image */}
+        <img
+          src={campaign.image_link}
+          alt={campaign.name}
+          className="w-24 h-24 object-cover rounded"
+        />
+
+        {/* Campaign Name */}
+        <p className="text-sm font-medium text-center">{campaign.name}</p>
+      </div>
+    ))
+  ) : (
+    <div className="flex items-center justify-center h-full text-gray-500 py-8">
+      No campaigns found
+    </div>
+  )}
+</div>
+
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

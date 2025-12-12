@@ -7,7 +7,7 @@ export default function Home() {
 
   useEffect(() => {
     // Redirect to customer page by default
-    router.push('/customer');
+    router.push('/new-plan');
   }, [router]);
 
   return (
