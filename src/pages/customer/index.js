@@ -7,6 +7,7 @@ export default function CustomerApproveList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalData, setTotalData] = useState(0);
+
   const itemsPerPage = 6;
 
   const columns = [
@@ -53,44 +54,34 @@ export default function CustomerApproveList() {
 
   const getPages = () => {
     const pages = [];
-
-    // Always show 1
     pages.push(1);
 
     if (totalPages <= 5) {
-      // If few pages → show all
       for (let i = 2; i <= totalPages; i++) pages.push(i);
       return pages;
     }
 
-    // Middle pages logic (always 3 pages)
     let start = currentPage - 1;
     let end = currentPage + 1;
 
-    // Adjust if near left
     if (start < 2) {
       start = 2;
       end = 4;
     }
 
-    // Adjust if near right
     if (end > totalPages - 1) {
       end = totalPages - 1;
       start = totalPages - 3;
     }
 
-    // Add left dots if needed
     if (start > 2) pages.push("...");
 
-    // Add middle 3 pages
     for (let i = start; i <= end; i++) {
       pages.push(i);
     }
 
-    // Add right dots if needed
     if (end < totalPages - 1) pages.push("...");
 
-    // Always show last page
     pages.push(totalPages);
 
     return pages;
@@ -120,15 +111,15 @@ export default function CustomerApproveList() {
   const pages = getPages();
 
   return (
-    <div className="min-h-screen bg-gray-200 p-8">
-      <div className="bg-white rounded-lg shadow-sm  overflow-hidden flex flex-col h-[calc(100vh-4rem)]">
-      
-        <div className="flex border-b border-gray-200  justify-start gap-4 px-4 pt-4 ">
+    <div className="min-h-screen bg-gray-200 p-2 sm:p-4 md:p-6 lg:p-8">
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col h-[calc(100vh-1rem)] sm:h-[calc(100vh-2rem)] md:h-[calc(100vh-3rem)] lg:h-[calc(100vh-4rem)]">
+        {/* Tabs */}
+        <div className="flex border-b border-gray-200 justify-start gap-2 sm:gap-4 px-2 sm:px-4 pt-3 sm:pt-4 overflow-x-auto">
           {["All", "approved", "reject"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-2   py-3 text-xs font-bold transition-colors ${
+              className={`px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-bold transition-colors whitespace-nowrap ${
                 activeTab === tab
                   ? "border-b-2 border-[#309fed] text-[#309fed]"
                   : "text-gray-500 hover:text-gray-700"
@@ -138,113 +129,186 @@ export default function CustomerApproveList() {
             </button>
           ))}
         </div>
-
-        {/* SEARCH BAR - Fixed */}
-        <div className=" py-4 px-4  w-full ">
+        <div className="py-3 sm:py-6 px-2 sm:px-4 w-full">
           <input
             type="text"
             placeholder="Search..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-lg px-4 text-xs py-4  bg-gray-100 rounded-lg"
+            className="w-full sm:w-xl sm:min-w-[300px] px-3 sm:px-4 text-xs sm:text-sm py-2 sm:py-3 bg-gray-100 rounded-lg  placeholder-gray-300"
           />
         </div>
-      
-        <div className="flex-1 overflow-hidden">
-          <div className="rounded-lg h-full flex flex-col">
-       
-            <div className="grid grid-cols-6 w-full px-3 text-sm border-b border-gray-200 py-4 border-t flex-shrink-0">
-              {[
-                "Customer ",
-                "Name",
-                "Company",
-                "Email",
-                "Phone",
-                "Actions",
-              ].map((col, index) => (
-                <div
-                  key={col}
-                  className={`flex items-center gap-2 ${
-                    index === 5 ? "justify-center" : "justify-start"
-                  }`}
-                >
-                  {col}
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-5 h-4"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"
-                    />
-                  </svg>
-                </div>
-              ))}
+
+        {/* Table Container */}
+        <div className="flex-1 flex flex-col min-h-0">
+          <div className="rounded-lg flex flex-col h-full">
+            <div className="hidden md:flex md:flex-col h-full">
+              <div className="grid grid-cols-6 w-full px-2 lg:px-4 text-xs lg:text-sm border-b border-gray-200 text-gray-400 py-6 lg:py-6 border-t bg-gray-50 z-10">
+                {[
+                  "Customer",
+                  "Name",
+                  "Company",
+                  "Email",
+                  "Phone",
+                  "Actions",
+                ].map((col, index) => (
+                  <div key={col} className="flex justify-center">
+                    <div className="flex items-center gap-1 lg:gap-2 font-medium">
+                      <span>{col}</span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="w-4 h-3 lg:w-5 lg:h-4"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Table Body - Scrollable with explicit height */}
+              <div className="flex-1 overflow-auto max-h-[calc(100vh-300px)]">
+                {paginatedCustomers.length > 0 ? (
+                  paginatedCustomers.map((customer) => (
+                    <div
+                      key={customer.id}
+                      className="grid grid-cols-6 w-full text-xs lg:text-sm hover:bg-gray-50  py-3"
+                    >
+                      <div className="flex justify-center items-center px-2 truncate">
+                        {customer.customer_number || "N/A"}
+                      </div>
+
+                      <div className="flex justify-center items-center px-2 truncate">
+                        {customer.first_name} {customer.last_name}
+                      </div>
+
+                      <div className="flex justify-center items-center px-2 truncate">
+                        {customer.company_type || "Individual"}
+                      </div>
+
+                      <div className="flex justify-center items-center px-2 truncate">
+                        {customer.email}
+                      </div>
+
+                      <div className="flex justify-center items-center px-2 truncate">
+                        {customer.phone}
+                      </div>
+
+                      <div className="flex justify-center items-center gap-2 px-2">
+                        {customer.status !== "approved" && (
+                          <button
+                            onClick={() => handleApprove(customer.id)}
+                            className="px-3 lg:px-4 border-2 border-transparent text-black text-md rounded-xs py-1.5 hover:border-green-500 hover:bg-green-50 transition-colors"
+                          >
+                            Approve
+                          </button>
+                        )}
+                        {customer.status !== "rejected" && (
+                          <button
+                            onClick={() => handleReject(customer.id)}
+                            className="px-3 lg:px-4 border-2 border-transparent text-black text-md rounded-xs py-1.5 hover:border-red-500 hover:bg-red-50 transition-colors"
+                          >
+                            Reject
+                          </button>
+                        )}
+                        {(customer.status === "approved" ||
+                          customer.status === "rejected") && (
+                          <span className="text-center text-xs lg:text-sm font-medium">
+                            {customer.status.charAt(0).toUpperCase() +
+                              customer.status.slice(1)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-500 py-8">
+                    No customers found
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Scrollable table body */}
-            <div className="flex flex-col py-4 overflow-auto px-3">
+            {/* Mobile Card View */}
+            <div className="md:hidden flex flex-col gap-3 overflow-auto pb-4 h-full">
               {paginatedCustomers.length > 0 ? (
                 paginatedCustomers.map((customer) => (
                   <div
                     key={customer.id}
-                    className="grid grid-cols-6 w-full text-xs hover:bg-gray-50 border-b border-gray-100 py-3"
+                    className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm"
                   >
-                    {/* Customer Number */}
-                    <div className="flex items-center px-2 truncate">
-                      {customer.customer_number || "N/A"}
-                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="text-xs text-gray-500">Customer #</p>
+                          <p className="text-sm font-semibold">
+                            {customer.customer_number || "N/A"}
+                          </p>
+                        </div>
+                        {(customer.status === "approved" ||
+                          customer.status === "rejected") && (
+                          <span
+                            className={`text-xs px-2 py-1 rounded ${
+                              customer.status === "approved"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-red-100 text-red-700"
+                            }`}
+                          >
+                            {customer.status.charAt(0).toUpperCase() +
+                              customer.status.slice(1)}
+                          </span>
+                        )}
+                      </div>
 
-                    {/* Name */}
-                    <div className="flex items-center px-2 truncate">
-                      {customer.first_name} {customer.last_name}
-                    </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Name</p>
+                        <p className="text-sm font-medium">
+                          {customer.first_name} {customer.last_name}
+                        </p>
+                      </div>
 
-                    {/* Company */}
-                    <div className="flex items-center px-2 truncate">
-                      {customer.company_type || "Individual"}
-                    </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Company</p>
+                        <p className="text-sm">
+                          {customer.company_type || "Individual"}
+                        </p>
+                      </div>
 
-                    {/* Email */}
-                    <div className="flex items-center px-2 truncate">
-                      {customer.email}
-                    </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Email</p>
+                        <p className="text-sm truncate">{customer.email}</p>
+                      </div>
 
-                    {/* Phone */}
-                    <div className="flex items-center px-2">
-                      {customer.phone}
-                    </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Phone</p>
+                        <p className="text-sm">{customer.phone}</p>
+                      </div>
 
-                    {/* Actions */}
-                    <div className="flex items-center justify-center px-2 gap-2">
-                      {customer.status !== "approved" && (
-                        <button
-                          onClick={() => handleApprove(customer.id)}
-                          className="px-4 border-green-500 text-black text-xs rounded-xs py-1.5 border-2 hover:bg-green-50"
-                        >
-                          Approved
-                        </button>
-                      )}
-                      {customer.status !== "rejected" && (
-                        <button
-                          onClick={() => handleReject(customer.id)}
-                          className="px-4 border-red-500 text-black border-2 rounded-xs text-xs py-1.5 hover:bg-red-50"
-                        >
-                          Reject
-                        </button>
-                      )}
-                      {(customer.status === "approved" ||
-                        customer.status === "rejected") && (
-                        <span className="text-center text-sm">
-                          {customer.status.charAt(0).toUpperCase() +
-                            customer.status.slice(1)}
-                        </span>
-                      )}
+                      {customer.status !== "approved" &&
+                        customer.status !== "rejected" && (
+                          <div className="flex gap-2 pt-2">
+                            <button
+                              onClick={() => handleApprove(customer.id)}
+                              className="flex-1 px-4 text-black text-xs rounded py-2 border-2 hover:hover:border-green-500 transition-colors font-medium"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => handleReject(customer.id)}
+                              className="flex-1 px-4 hover:border-red-500 text-black border-2 rounded text-xs py-2 transition-colors font-medium"
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        )}
                     </div>
                   </div>
                 ))
@@ -256,26 +320,29 @@ export default function CustomerApproveList() {
             </div>
           </div>
         </div>
-        {/* PAGINATION - Fixed at bottom */}
-        <div className="flex justify-between items-center py-6 px-6 bg-gray-50 border-t  border-gray-200 flex-shrink-0">
+        {/* Pagination */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0 py-4 sm:py-6 px-3 sm:px-6 bg-gray-50 border-t border-gray-200 flex-shrink-0">
           <div className="text-gray-700 text-xs flex items-center gap-2">
             <span>Show result:</span>
-            <span className="border border-gray-300 text-xs  font-semibold pr-8 pl-2 py-1  rounded ">
-              {currentPage}
+            <span className="border border-gray-300 text-xs font-semibold pr-6 sm:pr-8 sm:py-1.5 pl-2 py-1 rounded">
+              {itemsPerPage}
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto">
             {pages.map((p, index) =>
               p === "..." ? (
-                <span key={`ellipsis-${index}`} className="px-2 text-gray-400">
+                <span
+                  key={`ellipsis-${index}`}
+                  className="px-2 text-gray-400 text-xs"
+                >
                   ...
                 </span>
               ) : (
                 <button
                   key={p}
                   onClick={() => setCurrentPage(p)}
-                  className={`px-3 py-2  text-xs rounded-xl ${
+                  className={`px-2 sm:px-3 py-1.5 sm:py-2 text-xs rounded-lg sm:rounded-lg ${
                     p === currentPage
                       ? "bg-[#d1eafd] text-blue-600 font-semibold border-blue-400"
                       : "bg-white hover:bg-gray-100"
@@ -291,18 +358,3 @@ export default function CustomerApproveList() {
     </div>
   );
 }
-
-<svg
-  xmlns="http://www.w3.org/2000/svg"
-  fill="none"
-  viewBox="0 0 24 24"
-  stroke-width="1.5"
-  stroke="currentColor"
-  class="size-6"
->
-  <path
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"
-  />
-</svg>;
