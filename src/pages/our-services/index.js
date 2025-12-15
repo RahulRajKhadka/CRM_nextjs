@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 
 export default function OurServicesPage() {
   const [services, setServices] = useState([]);
+  const [activeTab, setActiveTab] = useState("active");
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -52,23 +53,41 @@ export default function OurServicesPage() {
     setServices(services.filter((service) => service.id !== id));
   };
 
-  const filteredServices = services.filter((service) => {
-    return (
-      service.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      service.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      service.description?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  });
+const filteredServices = services.filter((service) => {
+  const matchesSearch =
+    service.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    service.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    service.category?.toLowerCase().includes(searchQuery.toLowerCase());
+
+  if (activeTab === "active")
+    return matchesSearch && service.status !== "inactive" && service.status !== "archived";
+  if (activeTab === "inactive")
+    return matchesSearch && service.status === "inactive";
+  if (activeTab === "archived")
+    return matchesSearch && service.status === "archived";
+
+  return matchesSearch;
+});
+
 
   return (
     <div className="min-h-screen bg-gray-200 p-2 sm:p-4 md:p-6 lg:p-8">
       <div className="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col h-[calc(100vh-1rem)] sm:h-[calc(100vh-2rem)] md:h-[calc(100vh-3rem)] lg:h-[calc(100vh-4rem)]">
-        {/* Header */}
-        <div className="border-b border-gray-200 px-4 pt-4 pb-3">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
-            Our Services
-          </h1>
-        </div>
+        <div className="flex border-b border-gray-200 justify-start gap-2 sm:gap-4 px-2 sm:px-4 pt-3 sm:pt-4 overflow-x-auto">
+              {["All", "approved", "reject"].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-bold transition-colors whitespace-nowrap ${
+                    activeTab === tab
+                      ? "border-b-2 border-[#309fed] text-[#309fed]"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </button>
+              ))}
+            </div>
 
         {/* Search & Add */}
         <div className="py-3 sm:py-6 px-2 flex gap-3 sm:px-4 w-full">
@@ -104,6 +123,7 @@ export default function OurServicesPage() {
         {/* Table Container */}
         <div className="flex-1 flex flex-col min-h-0">
           <div className="rounded-lg flex flex-col h-full">
+           
 
             <div className="hidden md:flex md:flex-col h-full">
               <div className="grid grid-cols-4 w-full px-2 lg:px-4 text-xs lg:text-sm border-b border-gray-200 text-gray-400 py-6 lg:py-6 border-t bg-gray-50 z-10">
@@ -145,17 +165,15 @@ export default function OurServicesPage() {
                         {service.name}
                       </div>
                       <div className="flex justify-center items-center px-2">
-
                         <picture>
- <img
-                          src={service.image_link}
-                          alt={service.name}
-                          className="w-12 h-12 object-cover rounded"
-                        />
+                          <img
+                            src={service.image_link}
+                            alt={service.name}
+                            className="w-12 h-12 object-cover rounded"
+                          />
                         </picture>
-                       
                       </div>
-                     
+
                       <div className="flex justify-center items-center px-2 truncate">
                         {service.description}
                       </div>
@@ -180,7 +198,7 @@ export default function OurServicesPage() {
                           Enable
                         </button>
 
-                        {/* Disable Button */}
+                        
                         <button
                           onClick={() =>
                             setServices(
@@ -245,7 +263,7 @@ export default function OurServicesPage() {
         </div>
       </div>
 
-{/*      
+      {/*      
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-96">

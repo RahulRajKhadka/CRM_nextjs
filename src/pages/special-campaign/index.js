@@ -4,6 +4,7 @@ export default function CampaignsPage() {
   const [campaigns, setCampaigns] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("active");
 
   useEffect(() => {
     const fetchCampaigns = async () => {
@@ -22,23 +23,43 @@ export default function CampaignsPage() {
     fetchCampaigns();
   }, []);
 
-  const filteredCampaigns = campaigns.filter((campaign) => {
-    return (
-      campaign.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      campaign.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      campaign.description?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  });
+ const filteredCampaigns = campaigns.filter((campaign) => {
+  const matchesSearch =
+    campaign.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    campaign.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    campaign.type?.toLowerCase().includes(searchQuery.toLowerCase());
+
+  if (activeTab === "running")
+    return matchesSearch && campaign.status === "running";
+  if (activeTab === "completed")
+    return matchesSearch && campaign.status === "completed";
+  if (activeTab === "paused")
+    return matchesSearch && campaign.status === "paused";
+
+  return matchesSearch;
+});
+
 
   return (
     <div className="min-h-screen bg-gray-200 p-2 sm:p-4 md:p-6 lg:p-8">
       <div className="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col h-[calc(100vh-1rem)] sm:h-[calc(100vh-2rem)] md:h-[calc(100vh-3rem)] lg:h-[calc(100vh-4rem)]">
-        {/* Header */}
-        <div className="border-b border-gray-200 px-4 pt-4 pb-3">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
-            Campaigns
-          </h1>
+        
+            <div className="flex border-b border-gray-200 justify-start gap-2 sm:gap-4 px-2 sm:px-4 pt-3 sm:pt-4 overflow-x-auto">
+          {["All", "approved", "reject"].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-bold transition-colors whitespace-nowrap ${
+                activeTab === tab
+                  ? "border-b-2 border-[#309fed] text-[#309fed]"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
         </div>
+       
 
         {/* Search */}
         <div className="py-3 sm:py-6 px-2 flex gap-3 sm:px-4 w-full">
@@ -71,6 +92,7 @@ export default function CampaignsPage() {
         {/* Table Container */}
         <div className="flex-1 flex flex-col min-h-0">
           <div className="rounded-lg flex flex-col h-full">
+
             {/* Desktop Table View */}
             <div className="hidden md:flex md:flex-col h-full">
               <div className="grid grid-cols-5 w-full px-2 lg:px-4 text-xs lg:text-sm border-b border-gray-200 text-gray-400 py-6 lg:py-6 border-t bg-gray-50 z-10">
@@ -138,7 +160,7 @@ export default function CampaignsPage() {
       onClick={() => handleApprove(campaign.id)}
       className="px-3 lg:px-4 border-2 border-transparent text-black text-md rounded-xs py-1.5 hover:border-green-500 hover:bg-green-50 transition-colors"
     >
-      Approve
+      Enable
     </button>
   )}
   {campaign.status !== "rejected" && (
@@ -146,7 +168,7 @@ export default function CampaignsPage() {
       onClick={() => handleReject(campaign.id)}
       className="px-3 lg:px-4 border-2 border-transparent text-black text-md rounded-xs py-1.5 hover:border-red-500 hover:bg-red-50 transition-colors"
     >
-      Reject
+      Disable
     </button>
   )}
   {(campaign.status === "approved" || campaign.status === "rejected") && (
