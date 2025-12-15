@@ -47,7 +47,7 @@ export default function CampaignsPage() {
             placeholder="Search campaigns..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full sm:w-xl sm:min-w-[300px] px-3 sm:px-4 text-xs sm:text-sm py-2 sm:py-3 bg-gray-100 rounded-lg placeholder-gray-300"
+            className="w-full sm:w-xl  px-3 sm:px-4 text-xs sm:text-sm py-3 sm:py-4 bg-gray-100 rounded-lg placeholder-gray-300"
           />
           <div class="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white md:text-sm text-xs px-4 py-2 rounded-md cursor-pointer">
             <svg
